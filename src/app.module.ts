@@ -6,7 +6,6 @@ import { ConfigModule } from '@nestjs/config';
 import { DatabaseModule } from './database/database.module';
 import { UrlShortenerModule } from './url-shortener/url-shortener.module';
 import { RedirectModule } from './redirect/redirect.module';
-import { DatabaseService } from './database/database.service';
 
 @Module({
   imports: [
@@ -15,7 +14,6 @@ import { DatabaseService } from './database/database.service';
     DatabaseModule,
     UrlShortenerModule,
     RedirectModule,
-    DatabaseService,
   ],
   controllers: [AppController],
   providers: [AppService],
