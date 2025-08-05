@@ -28,7 +28,7 @@ $ npm run start:prod
 ## Run tests
 
 ```bash
-# unit tests currently only url shortener service is covered
+# unit tests currently only cover url shortener service
 $ npm run test
 
 # test coverage
