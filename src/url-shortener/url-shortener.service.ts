@@ -1,13 +1,9 @@
-import {
-  Injectable,
-  NotFoundException,
-  ForbiddenException,
-} from '@nestjs/common';
+import { Injectable, ForbiddenException } from '@nestjs/common';
 import { CreateUrlShortenerDto } from './dto/create-url-shortener.dto';
 import { UpdateUrlShortenerDto } from './dto/update-url-shortener.dto';
-import { JwtPayload } from 'src/common/interfaces/jwt-payload.interface';
+import { JwtPayload } from '../common/interfaces/jwt-payload.interface';
 import { randomBytes } from 'crypto';
-import { DatabaseService } from 'src/database/database.service';
+import { DatabaseService } from '../database/database.service';
 import type { Request } from 'express';
 
 @Injectable()

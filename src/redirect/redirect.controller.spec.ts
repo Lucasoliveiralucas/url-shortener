@@ -1,12 +1,14 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { RedirectController } from './redirect.controller';
 import { RedirectService } from './redirect.service';
+import { DatabaseModule } from '../database/database.module';
 
 describe('RedirectController', () => {
   let controller: RedirectController;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
+      imports: [DatabaseModule],
       controllers: [RedirectController],
       providers: [RedirectService],
     }).compile();

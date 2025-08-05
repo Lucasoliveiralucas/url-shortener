@@ -3,7 +3,7 @@ import { UrlShortenerService } from './url-shortener.service';
 import { UrlShortenerController } from './url-shortener.controller';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { JwtStrategy } from 'src/auth/auth.strategy';
+import { JwtStrategy } from '../auth/auth.strategy';
 
 @Module({
   imports: [
