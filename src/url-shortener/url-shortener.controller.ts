@@ -16,7 +16,9 @@ import { OptionalJwtAuthGuard } from 'src/common/guards/optional-jwt-auth.guard'
 import { User } from 'src/common/decorators/user.decorator';
 import type { JwtPayload } from 'src/common/interfaces/jwt-payload.interface';
 import type { Request } from 'express';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('urls')
 @Controller('url-shortener')
 export class UrlShortenerController {
   constructor(private readonly urlShortenerService: UrlShortenerService) {}
