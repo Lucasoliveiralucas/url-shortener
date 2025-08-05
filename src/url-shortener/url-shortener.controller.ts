@@ -12,18 +12,14 @@ import {
 import { UrlShortenerService } from './url-shortener.service';
 import { CreateUrlShortenerDto } from './dto/create-url-shortener.dto';
 import { UpdateUrlShortenerDto } from './dto/update-url-shortener.dto';
-import { JwtService } from '@nestjs/jwt';
-import type { JwtPayload } from 'src/common/interfaces/jwt-payload.interface';
 import { OptionalJwtAuthGuard } from 'src/common/guards/optional-jwt-auth.guard';
 import { User } from 'src/common/decorators/user.decorator';
+import type { JwtPayload } from 'src/common/interfaces/jwt-payload.interface';
 import type { Request } from 'express';
 
 @Controller('url-shortener')
 export class UrlShortenerController {
-  constructor(
-    private readonly urlShortenerService: UrlShortenerService,
-    private jwt: JwtService,
-  ) {}
+  constructor(private readonly urlShortenerService: UrlShortenerService) {}
 
   @UseGuards(OptionalJwtAuthGuard)
   @Post()
@@ -35,26 +31,37 @@ export class UrlShortenerController {
     return this.urlShortenerService.create(createUrlShortenerDto, req, user);
   }
 
+  @UseGuards(OptionalJwtAuthGuard)
   @Get()
-  findAll() {
-    return this.urlShortenerService.findAll();
+  findAll(@User() user: JwtPayload) {
+    return this.urlShortenerService.findAll(user);
   }
 
+  @UseGuards(OptionalJwtAuthGuard)
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.urlShortenerService.findOne(+id);
+  findOne(@Param('id') id: string, @User() user: JwtPayload) {
+    return this.urlShortenerService.findOne(id, user);
   }
 
+  @UseGuards(OptionalJwtAuthGuard)
   @Patch(':id')
   update(
     @Param('id') id: string,
     @Body() updateUrlShortenerDto: UpdateUrlShortenerDto,
+    @User() user: JwtPayload,
+    @Req() req: Request,
   ) {
-    return this.urlShortenerService.update(+id, updateUrlShortenerDto);
+    return this.urlShortenerService.update(
+      id,
+      updateUrlShortenerDto,
+      user,
+      req,
+    );
   }
 
+  @UseGuards(OptionalJwtAuthGuard)
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.urlShortenerService.remove(+id);
+  remove(@Param('id') id: string, @User() user: JwtPayload) {
+    return this.urlShortenerService.remove(id, user);
   }
 }

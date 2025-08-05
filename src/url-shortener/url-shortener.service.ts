@@ -1,4 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ForbiddenException,
+} from '@nestjs/common';
 import { CreateUrlShortenerDto } from './dto/create-url-shortener.dto';
 import { UpdateUrlShortenerDto } from './dto/update-url-shortener.dto';
 import { JwtPayload } from 'src/common/interfaces/jwt-payload.interface';
@@ -8,14 +12,14 @@ import type { Request } from 'express';
 
 @Injectable()
 export class UrlShortenerService {
-  constructor(private databaseSevice: DatabaseService) {}
+  constructor(private databaseService: DatabaseService) {}
 
   async create(
     createUrlShortenerDto: CreateUrlShortenerDto,
     req: Request,
     user?: JwtPayload,
   ) {
-    const url = await this.databaseSevice.url.create({
+    const url = await this.databaseService.url.create({
       data: {
         id: crypto.randomUUID(),
         originalUrl: createUrlShortenerDto.originalUrl,
@@ -25,23 +29,54 @@ export class UrlShortenerService {
     });
 
     const fullUrl = `${req.protocol}://${req.get('host')}/${url.shortenedUrl}`;
-    return fullUrl;
+    return { shortUrl: fullUrl, id: url.id };
   }
 
-  findAll() {
-    return `This action returns all urlShortener`;
+  async findAll(user?: JwtPayload) {
+    if (!user?.sub) throw new ForbiddenException('Please sign in to continue');
+
+    return this.databaseService.findActiveUrls({
+      where: {
+        userId: user.sub,
+      },
+      orderBy: { createdAt: 'desc' },
+    });
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} urlShortener`;
+  async findOne(id: string, user?: JwtPayload) {
+    const url = await this.databaseService.findActiveUrlById(id, user?.sub);
+
+    return url;
   }
 
-  update(id: number, updateUrlShortenerDto: UpdateUrlShortenerDto) {
-    return `This action updates a #${id} urlShortener`;
+  async update(
+    id: string,
+    dto: UpdateUrlShortenerDto,
+    user?: JwtPayload,
+    req?: Request,
+  ) {
+    const url = await this.databaseService.findActiveUrlById(id, user?.sub);
+
+    const updated = await this.databaseService.url.update({
+      where: { id },
+      data: {
+        originalUrl: dto.originalUrl || url.originalUrl,
+      },
+    });
+
+    const fullUrl = `${req?.protocol}://${req?.get('host')}/${updated.shortenedUrl}`;
+    return { updatedUrl: fullUrl };
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} urlShortener`;
+  async remove(id: string, user?: JwtPayload) {
+    const url = await this.databaseService.findActiveUrlById(id, user?.sub);
+
+    await this.databaseService.url.update({
+      where: { id },
+      data: { deleted: true },
+    });
+
+    return { message: 'URL soft-deleted successfully' };
   }
 
   private generateShortCode(length = 6): string {
@@ -55,7 +90,7 @@ export class UrlShortenerService {
 
     for (let attempt = 0; attempt < maxAttempts; attempt++) {
       const code = this.generateShortCode();
-      const exists = await this.databaseSevice.url.findUnique({
+      const exists = await this.databaseService.url.findUnique({
         where: { shortenedUrl: code },
       });
 
