@@ -73,7 +73,7 @@ export class UrlShortenerService {
 
     await this.databaseService.url.update({
       where: { id },
-      data: { deleted: true },
+      data: { deleted: new Date() },
     });
 
     return { message: 'URL soft-deleted successfully' };

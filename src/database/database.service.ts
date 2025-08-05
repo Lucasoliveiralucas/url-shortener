@@ -24,7 +24,7 @@ export class DatabaseService extends PrismaClient implements OnModuleInit {
       ...args,
       where: {
         ...args?.where,
-        deleted: false,
+        deleted: null,
       },
     });
   }
@@ -33,7 +33,7 @@ export class DatabaseService extends PrismaClient implements OnModuleInit {
     return this.url.update({
       where: {
         shortenedUrl,
-        deleted: false,
+        deleted: null,
       },
       data: {
         hits: { increment: 1 },
@@ -45,7 +45,7 @@ export class DatabaseService extends PrismaClient implements OnModuleInit {
     const url = await this.url.findFirst({
       where: {
         id,
-        deleted: false,
+        deleted: null,
         userId: userId || null,
       },
     });
