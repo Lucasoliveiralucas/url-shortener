@@ -1,9 +1,4 @@
-import {
-  Injectable,
-  OnModuleInit,
-  NotFoundException,
-  ForbiddenException,
-} from '@nestjs/common';
+import { Injectable, OnModuleInit, NotFoundException } from '@nestjs/common';
 import { PrismaClient, Prisma } from '../../generated/prisma';
 
 @Injectable()
@@ -13,6 +8,7 @@ export class DatabaseService extends PrismaClient implements OnModuleInit {
       omit: {
         url: {
           userId: true,
+          deleted: true,
         },
       },
     });
@@ -46,23 +42,16 @@ export class DatabaseService extends PrismaClient implements OnModuleInit {
   }
 
   async findActiveUrlById(id: string, userId?: number) {
-    const url = await this.url.findUnique({
-      select: {
-        userId: true,
-        deleted: true,
-        user: true,
-        originalUrl: true,
-      },
+    const url = await this.url.findFirst({
       where: {
         id,
+        deleted: false,
+        userId: userId || null,
       },
     });
 
-    if (!url || url.deleted) throw new NotFoundException('URL not found');
+    if (!url) throw new NotFoundException('URL not found');
 
-    if (url.userId != userId) {
-      throw new ForbiddenException('You do not own this URL');
-    }
-    return { originalUrl: url.originalUrl };
+    return url;
   }
 }
